@@ -1,0 +1,16 @@
+{
+  "name": "hello-world-lambda",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hello-world AWS Lambda deployed with Serverless Framework v3 to a local MiniStack emulator",
+  "scripts": {
+    "deploy": "serverless deploy --stage local",
+    "invoke": "serverless invoke --function helloworld --stage local",
+    "info": "serverless info --stage local",
+    "remove": "serverless remove --stage local"
+  },
+  "devDependencies": {
+    "serverless": "3.40.0",
+    "serverless-localstack": "1.4.0"
+  }
+}

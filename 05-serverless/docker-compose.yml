@@ -1,0 +1,50 @@
+# Hello-world Lambda on a local AWS emulator (MiniStack).
+#
+#   docker compose up      -> starts MiniStack, installs npm deps, deploys and invokes the Lambda
+#   docker compose down    -> stops everything (MiniStack keeps state in memory only)
+name: hello-lambda
+
+x-env: &env
+  # Dummy credentials - MiniStack accepts anything.
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_REGION: us-east-1
+  # Inside the compose network MiniStack is reachable by its service name.
+  AWS_ENDPOINT_URL: http://ministack:4566
+  # Keep Serverless Framework v3 quiet and offline.
+  SLS_TELEMETRY_DISABLED: "1"
+  SLS_NOTIFICATIONS_MODE: "off"
+  NPM_CONFIG_UPDATE_NOTIFIER: "false"
+  # Lets `sls` / `serverless` from node_modules run directly in the container.
+  PATH: /app/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+x-node: &node
+  image: node:22-alpine
+  user: node
+  working_dir: /app
+  volumes:
+    - .:/app
+  environment: *env
+
+services:
+  # Local AWS emulator. Serverless only needs Lambda + CloudFormation, plus the
+  # services CloudFormation uses under the hood (S3 deployment bucket, IAM role,
+  # CloudWatch log group, STS for the account id).
+  ministack:
+    image: ministackorg/ministack:1.5.41
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: cloudformation,lambda,s3,iam,logs,sts
+      LOG_LEVEL: INFO
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4566/_ministack/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  # Used by the bin/ wrappers (node, npm, npx, sls). Not started by `docker compose up`.
+  node:
+    <<: *node
+    profiles: ["tools"]

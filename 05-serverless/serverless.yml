@@ -1,0 +1,26 @@
+service: hello-world
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: local
+
+plugins:
+  - serverless-localstack
+
+# Ship only the function code, not the tooling around it.
+package:
+  patterns:
+    - '!**'
+    - ./functions/**.js
+
+custom:
+  localstack:
+    # Only the "local" stage is redirected to the emulator.
+    stages:
+      - local
+    host: http://ministack
+    edgePort: 4566

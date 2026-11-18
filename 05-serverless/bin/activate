@@ -1,0 +1,29 @@
+# Makes `node`, `npm`, `npx` and `sls` in this terminal run inside Docker.
+#
+#   Usage (bash/zsh, from the project root):  source bin/activate
+#   Undo:                                     deactivate_node
+if [ ! -f "bin/activate" ] || [ ! -f "docker-compose.yml" ]; then
+  echo "Run this from the project root:  source bin/activate" >&2
+  return 1 2>/dev/null || exit 1
+fi
+
+if [ -n "${_NODE_DOCKER_OLD_PATH+x}" ]; then
+  echo "Already active. Type 'deactivate_node' to undo."
+  return 0 2>/dev/null || exit 0
+fi
+
+_NODE_DOCKER_OLD_PATH="$PATH"
+_NODE_DOCKER_OLD_PS1="${PS1-}"
+export PATH="$PWD/bin:$PATH"
+PS1="(node-in-docker) ${PS1-}"
+hash -r 2>/dev/null
+
+deactivate_node() {
+  export PATH="$_NODE_DOCKER_OLD_PATH"
+  PS1="$_NODE_DOCKER_OLD_PS1"
+  unset _NODE_DOCKER_OLD_PATH _NODE_DOCKER_OLD_PS1
+  unset -f deactivate_node
+  hash -r 2>/dev/null
+}
+
+echo "node, npm, npx and sls now run inside Docker (this terminal only). Undo with: deactivate_node"

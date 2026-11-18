@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs the given command inside the `node` container from docker-compose.yml.
+# The project root is mounted at /app, so commands always run in the project root.
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+exec docker compose --progress quiet -f "$ROOT/docker-compose.yml" run --rm node "$@"
