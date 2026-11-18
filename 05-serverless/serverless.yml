@@ -11,7 +11,6 @@ provider:
 plugins:
   - serverless-localstack
 
-# Ship only the function code, not the tooling around it.
 package:
   patterns:
     - '!**'
@@ -19,7 +18,6 @@ package:
 
 custom:
   localstack:
-    # Only the "local" stage is redirected to the emulator.
     stages:
       - local
     host: http://ministack
